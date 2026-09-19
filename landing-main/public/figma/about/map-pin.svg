@@ -1,0 +1,20 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="36.8243" height="47.6014" viewBox="0 0 36.8243 47.6014" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Map Pin">
+<g id="Vector 146" filter="url(#filter0_f_0_326)">
+<path d="M13.9115 43.9397H21.274" stroke="black" stroke-opacity="0.5" stroke-width="0.813699"/>
+</g>
+<g id="Map Pin_2">
+<g id="Vector">
+<path d="M12.6785 18.4123C12.6785 15.2468 15.2446 12.6807 18.41 12.6807C21.5755 12.6807 24.1416 15.2468 24.1416 18.4123C24.1416 21.5777 21.5755 24.1438 18.41 24.1438C15.2446 24.1438 12.6785 21.5777 12.6785 18.4123Z" fill="#7A02E1"/>
+<path d="M26.2916 10.5328C21.872 6.11338 14.7617 6.05894 10.41 10.4106C6.05852 14.7623 6.1135 21.872 10.5328 26.2915L18.5354 34.2941L26.4144 26.415L31.5321 31.5327L18.6139 44.4508L5.49371 31.3306C-1.75186 24.0849 -1.84201 12.4275 5.29234 5.29295L5.62996 4.96354C12.79 -1.8374 24.198 -1.63881 31.3307 5.49365L31.6647 5.83708C38.4676 12.9879 38.5539 24.1479 31.8608 31.1944L31.5321 31.5327L26.4144 26.415C30.7661 22.0633 30.7111 14.9523 26.2916 10.5328Z" fill="#7A02E1"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_326" x="10.6567" y="40.2781" width="13.8721" height="7.32329" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1.6274" result="effect1_foregroundBlur_0_326"/>
+</filter>
+</defs>
+</svg>

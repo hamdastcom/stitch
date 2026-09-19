@@ -1,0 +1,115 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+// Release signing — Cafebazaar only accepts signed release APKs.
+// Fill in android/keystore.properties (git-ignored); if it's missing we fall
+// back to an unsigned release build so debug workflows keep working.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "ir.lontra.hamdast"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "ir.lontra.hamdast"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 12
+        versionName "1.0.11"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+        // Present on every flavor so BuildConfig stays consistent; Myket overrides it.
+        buildConfigField "String", "IAB_PUBLIC_KEY", "\"\""
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    // Separate store APKs so Bazaar billing is never in the Myket binary and
+    // vice versa. `direct` keeps the existing Zibal (non-store) debug APK.
+    flavorDimensions = ["store"]
+    productFlavors {
+        direct {
+            dimension "store"
+        }
+        bazaar {
+            dimension "store"
+        }
+        myket {
+            dimension "store"
+            def marketApplicationId = "ir.mservices.market"
+            def marketBindAddress = "ir.mservices.market.InAppBillingService.BIND"
+            // Placeholders consumed by myket-billing-client's merged manifest.
+            manifestPlaceholders += [
+                marketApplicationId: marketApplicationId,
+                marketBindAddress  : marketBindAddress,
+                marketPermission   : "${marketApplicationId}.BILLING",
+                sdkVersion         : "6"
+            ]
+            buildConfigField "String", "IAB_PUBLIC_KEY", "\"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDmJ8XpqYNCXWcFSfOz5WCZENOd/icuy3/3GxNDrpF891Z63JzEuB+Aeju6cVOqIi6fvK70xyiZBA+eRrLe1A7xwnfDS022StR1uE7uDeYlbCbTAMMyl7u2upxtwE10uLlUo8Pfw9zRm28er0LhzXFqijpYFUdHSfE7Z1pan652TwIDAQAB\""
+        }
+    }
+    // Must match capacitor.build.gradle, which pins Java 21 and is regenerated
+    // by `cap sync` — Kotlin and Java targets have to agree or the build fails.
+    kotlinOptions {
+        jvmTarget = '21'
+    }
+    signingConfigs {
+        release {
+            if (keystoreProperties.containsKey('storeFile')) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystoreProperties.containsKey('storeFile')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+    // Cafebazaar in-app billing — bazaar flavor only
+    bazaarImplementation "com.github.cafebazaar.Poolakey:poolakey:$poolakeyVersion"
+    // Myket in-app billing — myket flavor only
+    myketImplementation "com.github.myketstore:myket-billing-client:$myketBillingVersion"
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

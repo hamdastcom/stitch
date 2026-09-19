@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --color-primary: #8b04ff;
+  --color-primary-dark: #6c01c8;
+  --color-primary-50: #f0dfff;
+  --color-primary-100: #e0bcff;
+  --color-primary-200: #ca8cff;
+  --color-primary-600: #7a02e1;
+  --color-neutral-50: #f1f2f3;
+  --color-neutral-100: #dddfe3;
+  --color-neutral-200: #b5bac2;
+  --color-neutral-300: #8b94a4;
+  --color-neutral-400: #656f81;
+  --color-neutral-500: #454c58;
+  --color-neutral-600: #383e48;
+  --color-grey-01: #f9fafb;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-600: var(--color-primary-600);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-grey-01: var(--color-grey-01);
+  --font-sans: var(--font-iranyekan), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-iranyekan), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+/* React 19 omits dir="ltr" on SSR; use CSS so RTL pages hydrate. */
+.direction-ltr {
+  direction: ltr;
+}
+
+.cta-gradient {
+  background-image: linear-gradient(263deg, #664cf0 1%, #a505be 94%);
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.caret-blink {
+  animation: caret-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret-blink {
+    animation: none;
+  }
+}
+
+@keyframes role-swap {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.role-swap {
+  animation: role-swap 0.4s ease;
+}
+
+@keyframes models-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+
+.models-marquee {
+  animation: models-marquee 32s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-swap {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .models-marquee {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+.faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-answer[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-answer {
+    transition: none;
+  }
+}

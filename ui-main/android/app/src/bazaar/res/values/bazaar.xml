@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      کلید عمومی RSA اپ، از پنل توسعه‌دهنده کافه‌بازار:
+      پنل > اپ شما > پرداخت درون‌برنامه‌ای > کلید عمومی RSA
+      کل رشته‌ی base64 را (بدون خط جدید و بدون BEGIN/END) اینجا بگذارید.
+      اگر خالی بماند، بررسی امضای محلی غیرفعال می‌شود و فقط تایید سمت سرور
+      ملاک خواهد بود.
+    -->
+    <string name="bazaar_rsa_public_key" translatable="false">MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwC8K19s5wyzq4pKpKW6EMmiLIxDZskT6yg0vN9r4ncmm+MopdEh/vT14alW8bOm5I2XZFo7MLcz9Zdlzv2nktwJnQKPeLv1GhM524QPuRK3aITZb8yAEjBvHuYXBDSYgnIdQ8y3PQliKrMTtdyDlvh3zXHak8AbnjtBs3VHfjat4z3BtRUxEfRzAZxY7yhm7VQ5jCJY4/kGDtc7wt2mqDKAxRkMTrjtD3OEjLhv6IECAwEAAQ==</string>
+</resources>

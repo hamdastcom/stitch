@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" dir="rtl" class="bg-background">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Hamdast</title>
+  <script>
+    (function () {
+      try {
+        var theme = null;
+        try {
+          var stored = localStorage.getItem("hamdast-ai-theme");
+          if (stored) {
+            stored = stored.replace(/^"|"$/g, "").toLowerCase();
+            if (stored === "dark") theme = "dark";
+            else if (stored === "light") theme = "light";
+          }
+        } catch (e) { }
+        var host = window.Hamdast || window.Myket;
+        if (!theme && host && typeof host.getTheme === "function") {
+          var raw = String(host.getTheme() || "").toLowerCase();
+          if (raw === "dark" || raw === "night" || raw === "black") theme = "dark";
+          else if (raw === "light" || raw === "default" || raw === "day") theme = "light";
+        }
+        if (!theme) {
+          theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) { }
+    })();
+  </script>
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "u3furqlqq6");
+  </script>
+</head>
+
+<body style="overflow: hidden; position: fixed; width: 100%; height: 100%;">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

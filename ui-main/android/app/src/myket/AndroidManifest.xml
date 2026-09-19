@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required on Android 11+ so the app can see/bind the Myket service.
+         The BILLING permission itself is merged from myket-billing-client. -->
+    <queries>
+        <package android:name="ir.mservices.market" />
+    </queries>
+</manifest>

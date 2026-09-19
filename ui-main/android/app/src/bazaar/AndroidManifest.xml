@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Cafebazaar in-app billing — bazaar flavor only -->
+    <uses-permission android:name="com.farsitel.bazaar.permission.PAY_THROUGH_BAZAAR" />
+
+    <!-- Required on Android 11+ so the app can see/bind the Bazaar service -->
+    <queries>
+        <package android:name="com.farsitel.bazaar" />
+    </queries>
+</manifest>

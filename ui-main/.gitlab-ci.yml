@@ -1,0 +1,225 @@
+stages:
+  - build
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: never
+
+default:
+  image: docker:27-cli
+
+  before_script:
+    - export DOCKER_HOST="unix:///var/run/docker.sock"
+    - test -S /var/run/docker.sock
+    - docker version
+    - docker compose version
+
+    - test -n "${DOCKER_REGISTRY:-}"
+    - test -n "${DOCKER_REGISTRY_IMAGE:-}"
+    - test -n "${DOCKER_REGISTRY_USER:-}"
+    - test -n "${DOCKER_REGISTRY_PASSWORD:-}"
+
+    - >
+      printf '%s' "${DOCKER_REGISTRY_PASSWORD}"
+      | docker login "${DOCKER_REGISTRY}"
+      --username "${DOCKER_REGISTRY_USER}"
+      --password-stdin
+
+  after_script:
+    - rm -f .env.production
+    - |
+      if [ -n "${BUILD_ENV_FILE:-}" ]; then
+        rm -f "${BUILD_ENV_FILE}"
+      fi
+    - docker logout "${DOCKER_REGISTRY}" || true
+
+variables:
+  DOCKER_HOST: "unix:///var/run/docker.sock"
+  DOCKER_BUILDKIT: "1"
+  GIT_DEPTH: "20"
+
+  COMPOSE_FILE: "docker-compose.ci.yml"
+  APP_PORT: "80"
+
+
+# ---------------------------------------------------------------------------
+# Build and push
+# ---------------------------------------------------------------------------
+
+build_image:
+  stage: build
+  interruptible: true
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      variables:
+        BUILD_ENV_VARIABLE: "DEVELOPMENT_BUILD_ENV"
+        BUILD_ENV_FILE: "./env/development.env"
+
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+      variables:
+        BUILD_ENV_VARIABLE: "STAGING_BUILD_ENV"
+        BUILD_ENV_FILE: "./env/staging.env"
+
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      variables:
+        BUILD_ENV_VARIABLE: "PRODUCTION_BUILD_ENV"
+        BUILD_ENV_FILE: "./env/production.env"
+
+  script:
+    # Resolve the temporary file created by the GitLab File-type variable.
+    - export BUILD_ENV_SOURCE="$(printenv "${BUILD_ENV_VARIABLE}")"
+    - test -n "${BUILD_ENV_SOURCE}"
+    - test -f "${BUILD_ENV_SOURCE}"
+
+    # Copy the selected environment file into the project.
+    - mkdir -p "$(dirname "${BUILD_ENV_FILE}")"
+    - cp "${BUILD_ENV_SOURCE}" "${BUILD_ENV_FILE}"
+    - chmod 600 "${BUILD_ENV_FILE}"
+
+    # Vite reads this file during the production build.
+    - cp "${BUILD_ENV_FILE}" .env.production
+
+    - export IMAGE_SHA="${DOCKER_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
+    - export IMAGE_BRANCH="${DOCKER_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}"
+
+    - echo "Building ${IMAGE_SHA}"
+    - echo "Using build environment file ${BUILD_ENV_FILE}"
+
+    - >
+      docker build
+      --pull
+      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.source=${CI_PROJECT_URL}"
+      --label "org.opencontainers.image.ref.name=${CI_COMMIT_REF_NAME}"
+      --tag "${IMAGE_SHA}"
+      --tag "${IMAGE_BRANCH}"
+      .
+
+    - docker push "${IMAGE_SHA}"
+    - docker push "${IMAGE_BRANCH}"
+
+
+# ---------------------------------------------------------------------------
+# Shared deployment template
+# ---------------------------------------------------------------------------
+
+.deploy:
+  stage: deploy
+  interruptible: false
+
+  needs:
+    - job: build_image
+
+  script:
+    - test -f "${COMPOSE_FILE}"
+
+    - export IMAGE_REPOSITORY="${DOCKER_REGISTRY_IMAGE}"
+    - export IMAGE_TAG="${CI_COMMIT_SHA}"
+
+    # Create env vars used by docker compose file
+    - export APP_DOMAIN="${APP_SUBDOMAIN}.${PRODUCT_DOMAIN}"
+    - export UNIQUE_NAME="${PRODUCT_NAME}-${DEPLOY_ENV}-${APP_NAME}"
+
+    - echo "Deploying ${APP_NAME}"
+    - echo "Environment ${DEPLOY_ENV}"
+    - echo "Domain ${APP_DOMAIN}"
+    - echo "Image ${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+
+    - >
+      docker compose
+      -f "${COMPOSE_FILE}"
+      config --quiet
+
+    - >
+      docker compose
+      -f "${COMPOSE_FILE}"
+      pull
+
+    - >
+      docker compose
+      -f "${COMPOSE_FILE}"
+      up
+      --force-recreate
+      --detach
+      --remove-orphans
+      --no-build
+
+    - >
+      docker compose
+      -f "${COMPOSE_FILE}"
+      ps
+
+
+# ---------------------------------------------------------------------------
+# Development
+# develop -> dev.app.hamdast.com
+# ---------------------------------------------------------------------------
+
+deploy_development:
+  extends: .deploy
+
+  variables:
+    DEPLOY_ENV: "development"
+    APP_NAME: "frontend-ui"
+    APP_SUBDOMAIN: "dev.app"
+
+  environment:
+    name: development
+    url: https://dev.app.hamdast.com
+
+  resource_group: hamdast-development
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+
+# ---------------------------------------------------------------------------
+# Staging
+# staging -> stage.app.hamdast.com
+# ---------------------------------------------------------------------------
+
+deploy_staging:
+  extends: .deploy
+
+  variables:
+    DEPLOY_ENV: "staging"
+    APP_NAME: "frontend-ui"
+    APP_SUBDOMAIN: "stage.app"
+
+  environment:
+    name: staging
+    url: https://stage.app.hamdast.com
+
+  resource_group: hamdast-staging
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+
+
+# ---------------------------------------------------------------------------
+# Production
+# main -> app.hamdast.com
+# ---------------------------------------------------------------------------
+
+deploy_production:
+  extends: .deploy
+
+  variables:
+    DEPLOY_ENV: "production"
+    APP_NAME: "frontend-ui"
+    APP_SUBDOMAIN: "app"
+
+  environment:
+    name: production
+    url: https://app.hamdast.com
+
+  resource_group: hamdast-production
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+

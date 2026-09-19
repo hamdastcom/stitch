@@ -1,0 +1,32 @@
+name: lontra-ai-ui
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lontra-ai-ui:latest
+    container_name: lontra-ai-ui
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      # Traefik routing
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+
+      # UI router
+      - "traefik.http.routers.lontra-ui.rule=Host(`app.lontra.ir`)"
+      - "traefik.http.routers.lontra-ui.rule=Host(`app.hamdast.com`)"
+      - "traefik.http.routers.lontra-ui.entrypoints=websecure"
+      - "traefik.http.routers.lontra-ui.tls=true"
+      - "traefik.http.routers.lontra-ui.tls.certresolver=production"
+      - "traefik.http.routers.lontra-ui.service=lontra-ui"
+
+      # UI service
+      - "traefik.http.services.lontra-ui.loadbalancer.server.port=80"
+
+networks:
+  traefik:
+    external: true
+    name: traefik

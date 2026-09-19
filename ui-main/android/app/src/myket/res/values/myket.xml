@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      کلید عمومی RSA اپ، از پنل توسعه‌دهنده مایکت:
+      پنل > برنامه شما > پرداخت درون‌برنامه‌ای > کلید عمومی
+      کل رشته‌ی base64 را (بدون خط جدید و بدون BEGIN/END) اینجا بگذارید.
+    -->
+    <string name="myket_rsa_public_key" translatable="false">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDmJ8XpqYNCXWcFSfOz5WCZENOd/icuy3/3GxNDrpF891Z63JzEuB+Aeju6cVOqIi6fvK70xyiZBA+eRrLe1A7xwnfDS022StR1uE7uDeYlbCbTAMMyl7u2upxtwE10uLlUo8Pfw9zRm28er0LhzXFqijpYFUdHSfE7Z1pan652TwIDAQAB</string>
+</resources>
