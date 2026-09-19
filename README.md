@@ -1,0 +1,2 @@
+# stitch
+stitch mcp
